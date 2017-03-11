@@ -19,11 +19,11 @@ public class driverDFA {
   public static void main(String[] args) {
     //Check if the user passed in information
     //If they did not then set the local input variable to empty string
-    String input = (args.length > 0)?args[0]:"";
+    String input = ( args.length > 0 ) ? args[0] : "" ;
     //Create a string which will either be empty or contain the word not
     //Depending on the validation process for the dfa
-    String not = (new ManWolf(input).calculateDFAString())?"":"NOT";
+    String not = ( new ManWolf(input).calculateDFAString() ) ? "" : "NOT ";
     //Print the message to the user depending on the validation of the dfa
-    System.out.printf("This is %s a solution! %n", not);
+    System.out.println("This is " + not + "a solution!");
   }
 }

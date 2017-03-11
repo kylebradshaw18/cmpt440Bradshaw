@@ -19,11 +19,14 @@ public class ManWolf {
   }
   /**
    * @Properties These are all of the properties for the ManWolf Class
+   *    @errorState This state is used for an error found in the transition
    *    @currentState Is the current location or state that the DFA is in
    *    @acceptState This is the accepting state for the DFA in order for
    *       the DFA to pass it needs a correct solution
    *    @input This is the string that is passed into the Constructor
    *       and will be used to see if it passed validation or not
+   *    @regEx This is the string for the regex expression to check if the input is 
+   *       only the allowed characters
    *    @characters This is an array of chars that are all of the possible 
    *       letters of the alphabet that this dfa uses. The order is important
    *       because it goes by index for the transitions property
@@ -33,8 +36,8 @@ public class ManWolf {
    *       passed in from the input. A -1 is considered the error state which will
    *       return false because the input string does not satisfy this DFA
    */
-  private int currentState = 0, acceptState = 9;
-  private String input;
+  private int errorState = -1, currentState = 0, acceptState = 9;
+  private String input, regEx = "[cgnw]*";
   private final char[] characters = {'c', 'g', 'n', 'w'};
   private final int[][] transitions = {
     {-1, 1,-1,-1},
@@ -66,7 +69,7 @@ public class ManWolf {
    * @Return true or false depending on regex
    */
   private boolean checkAlphabet(){
-    return (Pattern.compile("[cgnw]*").matcher(this.input).matches())?true:false;
+    return Pattern.compile(this.regEx).matcher(this.input).matches();
   }
   /**
    * @Description Function that calculates the input string and sees if it is a 
@@ -83,11 +86,11 @@ public class ManWolf {
       //Set the current state to the result after the transition is made
       this.currentState = this.transitions[this.currentState][this.getIndexOfCharInArray(this.input.charAt(index))];
       //Return false if the current state is -1 because that is an error state
-      if(this.currentState == -1)
+      if(this.currentState == this.errorState)
         return false;
     }
     //Depending on the current state if it matches the accepting state then it succeded
     //else it did not and return false
-    return (this.currentState == this.acceptState)?true:false;
+    return this.currentState == this.acceptState;
   }
 }
