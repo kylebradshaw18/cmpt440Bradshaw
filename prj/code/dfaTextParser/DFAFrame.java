@@ -42,7 +42,6 @@ public class DFAFrame extends JFrame {
         });
 
         directoryButton.setFont(defaultFont);
-        directoryButton.setText("Choose Directory");
         directoryButton.setToolTipText("Choose a directory to look in");
         directoryButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -55,10 +54,6 @@ public class DFAFrame extends JFrame {
         searchTextField.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 searchTextField.selectAll();
-            }
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                if(!searchTextField.getText().equals(searchTextFieldDefaultText))
-                    searchTextField.setText(searchTextFieldDefaultText);
             }
         });
 
@@ -150,18 +145,13 @@ public class DFAFrame extends JFrame {
 
     private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {     
         model.setRowCount(0); //Clear all rows in the table
-        if(searchTextField.getText().length() > 0){
-            //Get all of the files and run the dfa
-            try{
-                files = new File(directoryTextField.getText()).listFiles();
-                showFiles(files);
-            } catch (Exception e){
-            } finally{
-                JOptionPane.showMessageDialog(this, model.getRowCount() + " Row's Found!");
-            }
-        } else { 
-            //Show Information Dialog
-            JOptionPane.showMessageDialog(this, "You are missing a search value.");
+        //Get all of the files and run the dfa
+        try{
+            files = new File(directoryTextField.getText()).listFiles();
+            showFiles(files);
+        } catch (Exception e){
+        } finally{
+            JOptionPane.showMessageDialog(this, model.getRowCount() + " Row's Found!");
         }
     }                                            
     public void showFiles(File[] files) {
@@ -197,11 +187,11 @@ public class DFAFrame extends JFrame {
         try{
             Pattern p;
             if(caseSensitive)
-                p = Pattern.compile(line);
+                p = Pattern.compile(searchTextField.getText());
             else 
-                p = Pattern.compile(line, Pattern.CASE_INSENSITIVE);
+                p = Pattern.compile(searchTextField.getText(), Pattern.CASE_INSENSITIVE);
 
-            returnValue = p.matcher(searchTextField.getText()).find();
+            returnValue = p.matcher(line).find();
         } catch (Exception e){
             returnValue = false;
         } finally {
@@ -210,15 +200,14 @@ public class DFAFrame extends JFrame {
     }                                                    
     private void showFileChooser(){
         JFileChooser chooser = new JFileChooser();
-        if(!directoryTextField.getText().equals("Choose Directory"))
+        if(!directoryTextField.getText().equals(directoryTextFieldDefaultText))
             chooser.setCurrentDirectory(new File(directoryTextField.getText()));
-        chooser.setDialogTitle("Choose a Directory");
+        chooser.setDialogTitle(directoryTextFieldDefaultText);
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
         
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             directoryTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-            searchButton.setEnabled(true);
         }
     }
     /**
@@ -244,13 +233,20 @@ public class DFAFrame extends JFrame {
     private boolean caseSensitive = false;
     private final String [] fileTableColumnName = new String[]{"Name", "Location", "Line Number"};
     private final String searchTextFieldDefaultText = "Search";
-    private DefaultTableModel model = new DefaultTableModel(new Object [][]{},fileTableColumnName);
+    private final String directoryTextFieldDefaultText = "Choose Directory";
+    private DefaultTableModel model = new DefaultTableModel(new Object [][]{},
+                                                            fileTableColumnName){
+        @Override //Sets the columns so they are not editable
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
     private final String defaultFontFamily = "Monaco";
     private final Font defaultFont = new Font(defaultFontFamily, 0, 13);
     private final Font defaultPanelFont = new Font(defaultFontFamily, 0, 18);
     private JCheckBox caseSensitiveCheckBox = new JCheckBox("Case Sensitive", caseSensitive);
-    private JButton directoryButton = new JButton(searchTextFieldDefaultText);
-    private JTextField directoryTextField = new JTextField("Choose Directory");
+    private JButton directoryButton = new JButton(directoryTextFieldDefaultText);
+    private JTextField directoryTextField = new JTextField(directoryTextFieldDefaultText);
     private JPanel filePanel = new JPanel();
     private JTable fileTable = new JTable(model);
     private JScrollPane fileScrollPane = new JScrollPane(fileTable);
@@ -258,4 +254,3 @@ public class DFAFrame extends JFrame {
     private JPanel searchPanel = new JPanel();
     private JTextField searchTextField = new JTextField(searchTextFieldDefaultText);               
 }
-
