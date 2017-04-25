@@ -2,8 +2,8 @@
  * @Author Kyle Bradshaw
  * @Course Formal Languages
  * @Date March 30th 2017
- * @File DFAFrame.java
- * @ClassName DFAFrame
+ * @File NFAFrame.java
+ * @ClassName NFAFrame
  * @Description This program builds a java JFrame desktop window.
  *  This desktop app will look through all of the files in the folder.
  *  It will then see if the string you are looking for is in that file.
@@ -19,25 +19,25 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.DefaultTableModel;
 
-public class DFAFrame extends JFrame {
+public class NFAFrame extends JFrame {
   /**
-   * @Constructor This will set all of the properties for the DFAFrame Class.
+   * @Constructor This will set all of the properties for the NFAFrame Class.
    *   This will also set the look and feel of the JFrame
    */
-  public DFAFrame() {
+  public NFAFrame() {
     //Allow the user to close the application by clicking the x on the frame
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     //set the frame to show
     setVisible(true);
     //Set the title of the app
-    setTitle("DFA Text Parser");
+    setTitle("NFA Text Parser");
     //Create a border for the search JPanel
     searchPanel.setBorder(BorderFactory.createTitledBorder( null, 
                                                             searchTextFieldDefaultText, 
                                                             TitledBorder.CENTER, 
                                                             TitledBorder.TOP, 
                                                             defaultPanelFont, 
-                                                            new Color(255, 153, 51)));
+                                                            Color.BLUE));
     //Create a tooltip for the directory text field and make it not enabled
     directoryTextField.setToolTipText("Choose a directory to look in");
     directoryTextField.setEnabled(false);
@@ -66,7 +66,7 @@ public class DFAFrame extends JFrame {
         searchTextField.selectAll();
       }
     });
-    //Add an action listener to the Checkbox which will change how the dfa
+    //Add an action listener to the Checkbox which will change how the NFA
     //Looks for the string in the line of the file
     caseSensitiveCheckBox.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent evt) {
@@ -125,7 +125,7 @@ public class DFAFrame extends JFrame {
                                                          TitledBorder.CENTER, 
                                                          TitledBorder.TOP, 
                                                          defaultPanelFont, 
-                                                         new Color(255, 153, 51)));
+                                                         Color.BLUE));
     //Set the cursor to the default cursor for the file panel
     filePanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     //Create the border for the file table
@@ -216,7 +216,7 @@ public class DFAFrame extends JFrame {
                                                                                                                               
   /**
    * @Description Function that is called when the search button is click
-   * It will run the DFA and update any rows in the file table with the file found
+   * It will run the NFA and update any rows in the file table with the file found
    * When the process is finished it will show a message telling the user 
    * 1) How many rows were found
    * 2) The number of files that were searched
@@ -231,6 +231,11 @@ public class DFAFrame extends JFrame {
     //Get the start time so we can see how long the process took
     Date startTime = new Date();
     try{
+      //set the pattern for the regex
+      if(caseSensitive)
+        pattern = Pattern.compile(searchTextField.getText());
+      else
+        pattern = Pattern.compile(searchTextField.getText(), Pattern.CASE_INSENSITIVE);
       //Create a list of files from the directory text field and run them
       runFiles(new File(directoryTextField.getText()).listFiles());
     } catch (Exception e){
@@ -286,8 +291,8 @@ public class DFAFrame extends JFrame {
       int lineIndex = 1;
       //Read each line of the file until the end
       while ((line = reader.readLine()) != null) {
-        //Check if the line passes the dfa if it does add the info to the table
-        if(runDFA(line))
+        //Check if the line passes the NFA if it does add the info to the table
+        if(runNFA(line))
           model.addRow( new Object[]{file.getName(), 
                         file.getAbsolutePath(), 
                         Integer.toString(lineIndex) });
@@ -303,18 +308,12 @@ public class DFAFrame extends JFrame {
    * @Line The line from the file that gets passed in
    * @Return true or false depending on if the value is in the line parameter
    */
-  private boolean runDFA(String line){ 
+  private boolean runNFA(String line){ 
     //Set the return value to false
     boolean returnValue = false;
     try{
-      Pattern p;
-      //Depending on if Case Sensitive is set we need to change the regex
-      if(caseSensitive)
-        p = Pattern.compile(searchTextField.getText());
-      else 
-        p = Pattern.compile(searchTextField.getText(), Pattern.CASE_INSENSITIVE);
       //Set the return value to the boolean if it was found or not
-      returnValue = p.matcher(line).find();
+      returnValue = pattern.matcher(line).find();
     } catch (Exception e){
       //Reset the return value to false and return it
       returnValue = false;
@@ -337,13 +336,12 @@ public class DFAFrame extends JFrame {
     chooser.setDialogTitle(directoryTextFieldDefaultText);
     //Set the filechooser to only look at Directories
     chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    chooser.setAcceptAllFileFilterUsed(false);
-    //When teh user clicks ok then set the directory text field to the value that was returned
+    //When the user clicks ok then set the directory text field to the value that was returned
     if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) 
       directoryTextField.setText(chooser.getSelectedFile().getAbsolutePath());
   }
   /**
-   * @Description Main method to run the DFA Frame application
+   * @Description Main method to run the NFA Frame application
    */
 
   public static void main(String args[]) {
@@ -361,7 +359,7 @@ public class DFAFrame extends JFrame {
               UnsupportedLookAndFeelException ex) {
     } finally{
       //Run the Application
-      new DFAFrame();
+      new NFAFrame();
     }
   }
 
@@ -386,6 +384,7 @@ public class DFAFrame extends JFrame {
   private JCheckBox caseSensitiveCheckBox = new JCheckBox("Case Sensitive", caseSensitive);
   private JButton directoryButton = new JButton(directoryTextFieldDefaultText);
   private JTextField directoryTextField = new JTextField(directoryTextFieldDefaultText);
+  private Pattern pattern;
   private JPanel filePanel = new JPanel();
   private JTable fileTable = new JTable(model);
   private JScrollPane fileScrollPane = new JScrollPane(fileTable);
