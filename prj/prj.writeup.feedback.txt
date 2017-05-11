@@ -1,0 +1,11 @@
+38 pts
+
+The project attempts to create a text parser. 
+The idea has good merit. 
+
+However, there are some issues...
+Writeup:
+- There are typos in the document. -1pt
+
+Overall:
+- Decent work below average of a formal languages student. -1pt
